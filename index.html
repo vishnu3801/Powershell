@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Add Mailbox Permission</title>
+</head>
+<body>
+<h1>Add Mailbox Permission</h1>
+<form id="permissionForm">
+<label for="mailbox">Mailbox:</label><br>
+<input type="text" id="mailbox" name="mailbox"><br>
+<label for="user">User:</label><br>
+<input type="text" id="user" name="user"><br>
+<label for="permission">Permission:</label><br>
+<select id="permission" name="permission">
+<option value="FullAccess">Full Access</option>
+<option value="SendAs">Send As</option>
+<!-- Add more options as needed -->
+</select><br>
+<button type="button" onclick="addMailboxPermission()">Add Permission</button>
+</form>
+<div id="result"></div>
+<script>
+       function addMailboxPermission() {
+           var mailbox = document.getElementById('mailbox').value;
+           var user = document.getElementById('user').value;
+           var permission = document.getElementById('permission').value;
+           // Make an AJAX request to the server to execute PowerShell command
+           fetch('/addMailboxPermission', {
+               method: 'POST',
+               headers: {
+                   'Content-Type': 'application/json',
+               },
+               body: JSON.stringify({ mailbox: mailbox, user: user, permission: permission }),
+           })
+           .then(response => response.json())
+           .then(data => {
+               // Handle the response from the server
+               document.getElementById('result').innerText = data.message;
+           })
+           .catch(error => {
+               console.error('Error:', error);
+               document.getElementById('result').innerText = 'An error occurred while processing the request.';
+           });
+       }
+</script>
+</body>
+</html>
