@@ -10,22 +10,37 @@ app.get('/', (req, res) => {
 });
 app.post('/addMailboxPermission', (req, res) => {
    const { mailbox, user, permission } = req.body;
+   // PowerShell command to import the Exchange Online module and connect
+   const connectCommand = `Import-Module ExchangeOnlineManagement; Connect-ExchangeOnline  -ShowProgress $true`;
    // PowerShell command to add mailbox permission
-   const command = `Connect-ExchangeOnline; Add-MailboxPermission -Identity "${mailbox}" -User "${user}" -AccessRights "${permission}"`;
-   // Execute the PowerShell command
-   exec(`powershell.exe -Command "& {${command}}"`, (error, stdout, stderr) => {
-       if (error) {
-           console.error(`Error: ${error.message}`);
-           res.status(500).json({ message: 'An error occurred while executing the PowerShell command.' });
+   const addPermissionCommand = `Add-MailboxPermission -Identity ${mailbox} -User ${user} -AccessRights ${permission}`;
+   // Execute the PowerShell command to connect to Exchange Online
+   exec(connectCommand, (connectError, connectStdout, connectStderr) => {
+       if (connectError) {
+           console.error(`Error: ${connectError.message}`);
+           res.status(500).json({ message: 'An error occurred while connecting to Exchange Online.' });
            return;
        }
-       if (stderr) {
-           console.error(`stderr: ${stderr}`);
-           res.status(500).json({ message: 'An error occurred while executing the PowerShell command.' });
+       if (connectStderr) {
+           console.error(`stderr: ${connectStderr}`);
+           res.status(500).json({ message: 'An error occurred while connecting to Exchange Online.' });
            return;
        }
-       console.log(`stdout: ${stdout}`);
-       res.json({ message: 'Mailbox permission added successfully.' });
+       // Execute the PowerShell command to add mailbox permission
+       exec(addPermissionCommand, (addError, addStdout, addStderr) => {
+           if (addError) {
+               console.error(`Error: ${addError.message}`);
+               res.status(500).json({ message: 'An error occurred while adding mailbox permission.' });
+               return;
+           }
+           if (addStderr) {
+               console.error(`stderr: ${addStderr}`);
+               res.status(500).json({ message: 'An error occurred while adding mailbox permission.' });
+               return;
+           }
+           console.log(`stdout: ${addStdout}`);
+           res.json({ message: 'Mailbox permission added successfully.' });
+       });
    });
 });
 app.listen(port, () => {
