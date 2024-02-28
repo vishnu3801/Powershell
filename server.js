@@ -11,7 +11,7 @@ app.get('/', (req, res) => {
 app.post('/addMailboxPermission', (req, res) => {
    const { mailbox, user, permission } = req.body;
    // PowerShell command to import the Exchange Online module and connect
-   const connectCommand = `Import-Module ExchangeOnlineManagement; Connect-ExchangeOnline  -ShowProgress $true`;
+   const connectCommand = `Install-module Exchnageonlinemanagement; Import-Module ExchangeOnlineManagement; Connect-ExchangeOnline  -ShowProgress $true`;
    // PowerShell command to add mailbox permission
    const addPermissionCommand = `Add-MailboxPermission -Identity ${mailbox} -User ${user} -AccessRights ${permission}`;
    // Execute the PowerShell command to connect to Exchange Online
